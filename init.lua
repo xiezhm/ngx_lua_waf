@@ -15,9 +15,10 @@ attacklog = optionIsOn(attacklog)
 CCDeny = optionIsOn(CCDeny)
 Redirect=optionIsOn(Redirect)
 function getClientIp()
-        IP  = ngx.var.remote_addr 
+        IP  = ngx.var.http_x_forwarded_for or ngx.var.remote_addr 
         if IP == nil then
                 IP  = "unknown"
+	
         end
         return IP
 end
@@ -224,7 +225,7 @@ end
 function whiteip()
     if next(ipWhitelist) ~= nil then
         for _,ip in pairs(ipWhitelist) do
-            if getClientIp()==ip then
+            if getClientIp()==ip or string.find(getClientIp(),ip) then
                 return true
             end
         end
@@ -235,7 +236,7 @@ end
 function blockip()
      if next(ipBlocklist) ~= nil then
          for _,ip in pairs(ipBlocklist) do
-             if getClientIp()==ip then
+             if getClientIp()==ip or string.find(getClientIp(),ip)  then
                  ngx.exit(403)
                  return true
              end
